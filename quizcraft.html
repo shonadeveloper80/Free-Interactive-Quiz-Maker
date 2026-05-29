@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizCraft ✨ — Build Beautiful Quizzes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+  :root {
+    --bg: #0f0a1e;
+    --surface: #1a1235;
+    --surface2: #231a45;
+    --card: #2a1f55;
+    --accent1: #ff6b9d;
+    --accent2: #c77dff;
+    --accent3: #74d7ff;
+    --accent4: #ffce5c;
+    --accent5: #6bffb8;
+    --text: #f0e8ff;
+    --text-muted: #9b8ec4;
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated starfield background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 60%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 50%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 65% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 75%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(2px 2px at 70% 70%, rgba(199,125,255,0.4) 0%, transparent 100%),
+      radial-gradient(2px 2px at 15% 45%, rgba(116,215,255,0.3) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(199,125,255,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(116,215,255,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(255,107,157,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 40px 20px 20px;
+  }
+
+  .logo {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: logoFloat 3s ease-in-out infinite;
+    letter-spacing: 2px;
+    text-shadow: none;
+    filter: drop-shadow(0 0 30px rgba(199,125,255,0.5));
+  }
+
+  @keyframes logoFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .tagline {
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  /* ===== TABS ===== */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .tab-btn {
+    background: var(--surface);
+    border: 2px solid transparent;
+    color: var(--text-muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    padding: 12px 28px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: 1px;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: white;
+    border-color: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(255,107,157,0.4);
+  }
+
+  .tab-btn:hover:not(.active) {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    transform: scale(1.03);
+  }
+
+  /* ===== MAIN LAYOUT ===== */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .view { display: none; animation: fadeSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .view.active { display: block; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: var(--surface);
+    border: 1px solid rgba(199,125,255,0.2);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 60px rgba(199,125,255,0.15);
+  }
+
+  /* ===== FORM ELEMENTS ===== */
+  .form-group { margin-bottom: 18px; }
+
+  label {
+    display: block;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 8px;
+  }
+
+  input[type="text"], textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 2px solid rgba(199,125,255,0.2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 14px 18px;
+    outline: none;
+    transition: all 0.3s ease;
+    resize: vertical;
+  }
+
+  input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 4px rgba(199,125,255,0.15);
+    background: var(--card);
+  }
+
+  textarea { min-height: 80px; }
+
+  select option { background: var(--surface2); }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    padding: 13px 28px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: white;
+    box-shadow: 0 6px 25px rgba(255,107,157,0.35);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 35px rgba(255,107,157,0.5);
+  }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--accent2);
+    border: 2px solid rgba(199,125,255,0.3);
+  }
+
+  .btn-secondary:hover {
+    background: var(--card);
+    border-color: var(--accent2);
+    transform: translateY(-2px);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #6bffb8, #00d4a0);
+    color: #0f0a1e;
+    box-shadow: 0 6px 25px rgba(107,255,184,0.3);
+  }
+
+  .btn-success:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 35px rgba(107,255,184,0.5);
+  }
+
+  .btn-danger {
+    background: rgba(255,80,80,0.15);
+    color: #ff6b6b;
+    border: 1px solid rgba(255,80,80,0.3);
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
+
+  .btn-danger:hover { background: rgba(255,80,80,0.25); transform: scale(1.05); }
+
+  .btn-add-q {
+    background: linear-gradient(135deg, var(--accent4), #ff9f43);
+    color: #1a0a00;
+    box-shadow: 0 6px 25px rgba(255,206,92,0.3);
+    width: 100%;
+    justify-content: center;
+    padding: 18px;
+    font-size: 1.1rem;
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+  }
+
+  .btn-add-q:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 35px rgba(255,206,92,0.5);
+  }
+
+  /* ===== QUESTION BLOCK ===== */
+  .question-block {
+    background: var(--card);
+    border: 1px solid rgba(199,125,255,0.15);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    position: relative;
+    animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-30px) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+
+  .question-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .question-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--accent4);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .q-badge {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent4), #ff9f43);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #1a0a00;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+  }
+
+  /* ===== OPTIONS ===== */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .option-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .option-label {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.85rem;
+    flex-shrink: 0;
+    color: white;
+  }
+
+  .option-label.A { background: linear-gradient(135deg, #ff6b9d, #ff8e53); }
+  .option-label.B { background: linear-gradient(135deg, #c77dff, #7b2fff); }
+  .option-label.C { background: linear-gradient(135deg, #74d7ff, #0094ff); }
+  .option-label.D { background: linear-gradient(135deg, #6bffb8, #00d4a0); }
+
+  .correct-select {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .correct-btn {
+    padding: 7px 18px;
+    border-radius: 50px;
+    border: 2px solid rgba(199,125,255,0.25);
+    background: var(--surface2);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.25s ease;
+  }
+
+  .correct-btn.selected {
+    background: linear-gradient(135deg, var(--accent5), #00d4a0);
+    color: #0f0a1e;
+    border-color: var(--accent5);
+    transform: scale(1.08);
+    box-shadow: 0 4px 15px rgba(107,255,184,0.4);
+  }
+
+  /* ===== QUIZ LIST ===== */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid rgba(199,125,255,0.2);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .quiz-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+    background: linear-gradient(180deg, var(--accent1), var(--accent2));
+  }
+
+  .quiz-card:hover {
+    transform: translateX(8px);
+    border-color: var(--accent2);
+    box-shadow: 0 10px 40px rgba(199,125,255,0.2);
+  }
+
+  .quiz-card-info h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .quiz-card-info p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .quiz-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* ===== PLAY VIEW ===== */
+  .play-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .play-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    background: linear-gradient(135deg, var(--accent1), var(--accent4));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 50px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+    border-radius: 50px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 15px rgba(199,125,255,0.5);
+  }
+
+  .q-counter {
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .play-question {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 36px;
+    margin-bottom: 24px;
+    text-align: center;
+    border: 1px solid rgba(199,125,255,0.2);
+    position: relative;
+    overflow: hidden;
+    animation: qPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes qPop {
+    from { opacity: 0; transform: scale(0.9) rotateX(10deg); }
+    to { opacity: 1; transform: scale(1) rotateX(0); }
+  }
+
+  .play-question::before {
+    content: '?';
+    position: absolute;
+    right: -20px; top: -30px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 12rem;
+    color: rgba(199,125,255,0.05);
+    line-height: 1;
+  }
+
+  .play-question h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
+  }
+
+  .play-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 600px) {
+    .play-options, .options-grid { grid-template-columns: 1fr; }
+  }
+
+  .play-option {
+    background: var(--surface);
+    border: 2px solid rgba(199,125,255,0.2);
+    border-radius: var(--radius);
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 18px 22px;
+    text-align: left;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: optionSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .play-option:nth-child(1) { animation-delay: 0.05s; }
+  .play-option:nth-child(2) { animation-delay: 0.1s; }
+  .play-option:nth-child(3) { animation-delay: 0.15s; }
+  .play-option:nth-child(4) { animation-delay: 0.2s; }
+
+  @keyframes optionSlide {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .play-option:hover:not(:disabled) {
+    border-color: var(--accent2);
+    background: var(--card);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 10px 30px rgba(199,125,255,0.25);
+  }
+
+  .play-option.correct {
+    background: linear-gradient(135deg, rgba(107,255,184,0.2), rgba(0,212,160,0.1));
+    border-color: var(--accent5);
+    transform: scale(1.03);
+    box-shadow: 0 10px 30px rgba(107,255,184,0.3);
+  }
+
+  .play-option.wrong {
+    background: linear-gradient(135deg, rgba(255,80,80,0.2), rgba(200,0,0,0.1));
+    border-color: #ff6b6b;
+  }
+
+  .play-option:disabled { cursor: not-allowed; }
+
+  .opt-letter {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+  }
+
+  /* ===== RESULTS ===== */
+  .results-screen {
+    text-align: center;
+    padding: 40px 20px;
+    animation: fadeSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .score-ring {
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    margin: 0 auto 30px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    position: relative;
+    background: conic-gradient(var(--accent1) 0deg, var(--accent2) 120deg, var(--accent3) 240deg, var(--surface) 240deg);
+    animation: spinIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 60px rgba(199,125,255,0.4);
+  }
+
+  @keyframes spinIn {
+    from { transform: scale(0) rotate(-180deg); }
+    to { transform: scale(1) rotate(0); }
+  }
+
+  .score-ring::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+  }
+
+  .score-num {
+    position: relative;
+    font-family: 'Fredoka One', cursive;
+    font-size: 3rem;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .score-label {
+    position: relative;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .result-emoji {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    animation: bounce 0.6s ease infinite alternate;
+    display: block;
+  }
+
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-12px); }
+  }
+
+  .result-msg {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .result-sub {
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+  }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    animation: float 3s ease-in-out infinite;
+    display: block;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+  }
+
+  .empty-state h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  /* ===== SECTION TITLE ===== */
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ===== NOTIFICATION ===== */
+  #toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: white;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    z-index: 1000;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 40px rgba(255,107,157,0.5);
+    white-space: nowrap;
+  }
+
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ===== CHIPS ===== */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(199,125,255,0.15);
+    border: 1px solid rgba(199,125,255,0.3);
+    border-radius: 50px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent2);
+    gap: 6px;
+  }
+
+  .flex-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .mt-16 { margin-top: 16px; }
+  .text-center { text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">✨ QuizCraft</div>
+  <div class="tagline">Build · Play · Share</div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showView('builder')">🛠 Builder</button>
+  <button class="tab-btn" onclick="showView('myquizzes')">📚 My Quizzes</button>
+  <button class="tab-btn" onclick="showView('play')">🎮 Play</button>
+</div>
+
+<div class="container">
+
+  <!-- ===== BUILDER VIEW ===== -->
+  <div id="view-builder" class="view active">
+    <div class="card">
+      <div class="section-title">🎨 Quiz Details</div>
+      <div class="form-group">
+        <label>Quiz Title</label>
+        <input type="text" id="quiz-title" placeholder="e.g. World Geography Genius 🌍" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="quiz-desc" placeholder="What is this quiz about? Add a fun description!" rows="2"></textarea>
+      </div>
+      <div class="flex-row">
+        <div class="form-group" style="flex:1">
+          <label>Category</label>
+          <select id="quiz-cat">
+            <option>🌍 Geography</option>
+            <option>🔬 Science</option>
+            <option>📚 History</option>
+            <option>🎵 Music</option>
+            <option>🎬 Movies</option>
+            <option>🏅 Sports</option>
+            <option>🍕 Food</option>
+            <option>💻 Technology</option>
+            <option>🧠 General Knowledge</option>
+            <option>🎨 Art & Culture</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">❓ Questions</div>
+    <div id="questions-container"></div>
+
+    <button class="btn btn-add-q" onclick="addQuestion()">
+      ✨ Add New Question
+    </button>
+
+    <div class="flex-row mt-16" style="justify-content:center; gap:14px">
+      <button class="btn btn-secondary" onclick="clearBuilder()">🗑 Clear All</button>
+      <button class="btn btn-success" onclick="saveQuiz()">💾 Save Quiz</button>
+    </div>
+  </div>
+
+  <!-- ===== MY QUIZZES VIEW ===== -->
+  <div id="view-myquizzes" class="view">
+    <div class="section-title">📚 My Quizzes</div>
+    <div id="quiz-list-container"></div>
+  </div>
+
+  <!-- ===== PLAY VIEW ===== -->
+  <div id="view-play" class="view">
+    <div id="play-select-screen">
+      <div class="section-title">🎮 Select a Quiz to Play</div>
+      <div id="play-select-list"></div>
+    </div>
+    <div id="play-game-screen" style="display:none"></div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ===== STATE =====
+let quizzes = JSON.parse(localStorage.getItem('quizcraft_quizzes') || '[]');
+let questionCount = 0;
+let currentQuiz = null;
+let currentQIndex = 0;
+let score = 0;
+let answered = false;
+
+// ===== TOAST =====
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ===== VIEW SWITCH =====
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.toLowerCase().includes(name === 'myquizzes' ? 'quizze' : name)) b.classList.add('active');
+  });
+  if (name === 'myquizzes') renderQuizList();
+  if (name === 'play') renderPlaySelect();
+}
+
+// ===== BUILDER =====
+function addQuestion() {
+  questionCount++;
+  const n = questionCount;
+  const container = document.getElementById('questions-container');
+  const div = document.createElement('div');
+  div.className = 'question-block';
+  div.id = 'qblock-' + n;
+  div.innerHTML = `
+    <div class="question-header">
+      <div class="question-num">
+        <div class="q-badge">${n}</div>
+        Question ${n}
+      </div>
+      <button class="btn btn-danger" onclick="removeQuestion(${n})">✕ Remove</button>
+    </div>
+    <div class="form-group">
+      <label>Question Text</label>
+      <textarea id="q-text-${n}" placeholder="Type your question here..." rows="2"></textarea>
+    </div>
+    <label>Answer Options</label>
+    <div class="options-grid" style="margin-top:10px">
+      ${['A','B','C','D'].map(l => `
+        <div class="option-row">
+          <div class="option-label ${l}">${l}</div>
+          <input type="text" id="q-opt-${n}-${l}" placeholder="Option ${l}..." />
+        </div>
+      `).join('')}
+    </div>
+    <div style="margin-top:14px">
+      <label>✅ Correct Answer</label>
+      <div class="correct-select" id="correct-${n}">
+        ${['A','B','C','D'].map(l => `
+          <button class="correct-btn" onclick="selectCorrect(${n},'${l}')" id="corr-${n}-${l}">${l}</button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  container.appendChild(div);
+  div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function selectCorrect(n, letter) {
+  document.querySelectorAll(`#correct-${n} .correct-btn`).forEach(b => b.classList.remove('selected'));
+  document.getElementById(`corr-${n}-${letter}`).classList.add('selected');
+}
+
+function removeQuestion(n) {
+  const el = document.getElementById('qblock-' + n);
+  el.style.transform = 'scale(0.9)';
+  el.style.opacity = '0';
+  el.style.transition = 'all 0.3s ease';
+  setTimeout(() => el.remove(), 300);
+  toast('Question removed 🗑');
+}
+
+function clearBuilder() {
+  if (!confirm('Clear all questions? This cannot be undone.')) return;
+  document.getElementById('questions-container').innerHTML = '';
+  document.getElementById('quiz-title').value = '';
+  document.getElementById('quiz-desc').value = '';
+  questionCount = 0;
+  toast('Builder cleared ✨');
+}
+
+function saveQuiz() {
+  const title = document.getElementById('quiz-title').value.trim();
+  const desc = document.getElementById('quiz-desc').value.trim();
+  const cat = document.getElementById('quiz-cat').value;
+
+  if (!title) { toast('⚠️ Please enter a quiz title!'); return; }
+
+  const blocks = document.querySelectorAll('.question-block');
+  if (blocks.length === 0) { toast('⚠️ Add at least one question!'); return; }
+
+  const questions = [];
+  let valid = true;
+
+  blocks.forEach(block => {
+    const n = block.id.replace('qblock-','');
+    const text = document.getElementById(`q-text-${n}`)?.value.trim();
+    const opts = ['A','B','C','D'].map(l => ({ letter: l, text: document.getElementById(`q-opt-${n}-${l}`)?.value.trim() || '' }));
+    const correctEl = document.querySelector(`#correct-${n} .correct-btn.selected`);
+    const correct = correctEl ? correctEl.textContent.trim() : null;
+
+    if (!text) { toast('⚠️ All questions need text!'); valid = false; return; }
+    if (!correct) { toast('⚠️ Select the correct answer for each question!'); valid = false; return; }
+    if (opts.some(o => !o.text)) { toast('⚠️ Fill in all answer options!'); valid = false; return; }
+
+    questions.push({ text, options: opts, correct });
+  });
+
+  if (!valid) return;
+
+  const quiz = {
+    id: Date.now(),
+    title, desc, cat,
+    questions,
+    created: new Date().toLocaleDateString()
+  };
+
+  quizzes.unshift(quiz);
+  localStorage.setItem('quizcraft_quizzes', JSON.stringify(quizzes));
+  toast('🎉 Quiz saved successfully!');
+
+  // Clear builder
+  document.getElementById('questions-container').innerHTML = '';
+  document.getElementById('quiz-title').value = '';
+  document.getElementById('quiz-desc').value = '';
+  questionCount = 0;
+}
+
+// ===== QUIZ LIST =====
+function renderQuizList() {
+  const container = document.getElementById('quiz-list-container');
+  if (quizzes.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">📝</span>
+        <h3>No quizzes yet!</h3>
+        <p>Head to the Builder tab to create your first quiz.</p>
+      </div>`;
+    return;
+  }
+  container.innerHTML = quizzes.map((q, i) => `
+    <div class="quiz-card" onclick="startQuizFromList(${i})">
+      <div class="quiz-card-info">
+        <h3>${q.title}</h3>
+        <p>${q.cat} • ${q.questions.length} questions • ${q.created}</p>
+        ${q.desc ? `<p style="margin-top:4px;color:var(--text-muted);font-size:0.85rem">${q.desc}</p>` : ''}
+      </div>
+      <div class="quiz-actions">
+        <span class="chip">▶ Play</span>
+        <button class="btn btn-danger" onclick="deleteQuiz(event,${i})">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteQuiz(e, i) {
+  e.stopPropagation();
+  if (!confirm('Delete this quiz?')) return;
+  quizzes.splice(i, 1);
+  localStorage.setItem('quizcraft_quizzes', JSON.stringify(quizzes));
+  renderQuizList();
+  toast('Quiz deleted 🗑');
+}
+
+function startQuizFromList(i) {
+  showView('play');
+  setTimeout(() => startQuiz(quizzes[i]), 100);
+}
+
+// ===== PLAY =====
+function renderPlaySelect() {
+  document.getElementById('play-select-screen').style.display = 'block';
+  document.getElementById('play-game-screen').style.display = 'none';
+  const container = document.getElementById('play-select-list');
+  if (quizzes.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">🎮</span>
+        <h3>No quizzes available!</h3>
+        <p>Create a quiz in the Builder tab first.</p>
+      </div>`;
+    return;
+  }
+  container.innerHTML = quizzes.map((q, i) => `
+    <div class="quiz-card" onclick="startQuiz(quizzes[${i}])">
+      <div class="quiz-card-info">
+        <h3>${q.title}</h3>
+        <p>${q.cat} • ${q.questions.length} questions</p>
+      </div>
+      <span class="chip">🎮 Play Now</span>
+    </div>
+  `).join('');
+}
+
+function startQuiz(quiz) {
+  currentQuiz = quiz;
+  currentQIndex = 0;
+  score = 0;
+  document.getElementById('play-select-screen').style.display = 'none';
+  document.getElementById('play-game-screen').style.display = 'block';
+  renderQuestion();
+}
+
+const optColors = ['#ff6b9d', '#c77dff', '#74d7ff', '#6bffb8'];
+
+function renderQuestion() {
+  const gs = document.getElementById('play-game-screen');
+  const q = currentQuiz.questions[currentQIndex];
+  const total = currentQuiz.questions.length;
+  const pct = (currentQIndex / total) * 100;
+
+  gs.innerHTML = `
+    <div class="play-header">
+      <div class="play-title">${currentQuiz.title}</div>
+      <div class="q-counter">Question ${currentQIndex + 1} of ${total}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="play-question"><h2>${q.text}</h2></div>
+    <div class="play-options">
+      ${q.options.map((opt, i) => `
+        <button class="play-option" onclick="selectAnswer('${opt.letter}')" id="opt-${opt.letter}">
+          <div class="opt-letter" style="background:linear-gradient(135deg, ${optColors[i]}, ${optColors[(i+1)%4]})">${opt.letter}</div>
+          ${opt.text}
+        </button>
+      `).join('')}
+    </div>
+    <div id="feedback" style="text-align:center;margin-top:20px;min-height:50px"></div>
+  `;
+  answered = false;
+}
+
+function selectAnswer(letter) {
+  if (answered) return;
+  answered = true;
+  const q = currentQuiz.questions[currentQIndex];
+  const isCorrect = letter === q.correct;
+  if (isCorrect) score++;
+
+  document.querySelectorAll('.play-option').forEach(btn => btn.disabled = true);
+
+  const chosen = document.getElementById('opt-' + letter);
+  const correct = document.getElementById('opt-' + q.correct);
+
+  if (isCorrect) {
+    chosen.classList.add('correct');
+  } else {
+    chosen.classList.add('wrong');
+    correct.classList.add('correct');
+  }
+
+  const fb = document.getElementById('feedback');
+  fb.innerHTML = isCorrect
+    ? `<div style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--accent5);animation:fadeSlideIn 0.4s ease">🎉 Correct! Well done!</div>`
+    : `<div style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:#ff6b6b;animation:fadeSlideIn 0.4s ease">❌ Oops! The answer was ${q.correct}</div>`;
+
+  setTimeout(() => {
+    currentQIndex++;
+    if (currentQIndex < currentQuiz.questions.length) {
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  }, 1600);
+}
+
+function showResults() {
+  const gs = document.getElementById('play-game-screen');
+  const total = currentQuiz.questions.length;
+  const pct = Math.round((score / total) * 100);
+
+  let emoji, msg;
+  if (pct === 100) { emoji = '🏆'; msg = 'Perfect Score!'; }
+  else if (pct >= 80) { emoji = '🌟'; msg = 'Amazing Work!'; }
+  else if (pct >= 60) { emoji = '😊'; msg = 'Great Effort!'; }
+  else if (pct >= 40) { emoji = '💪'; msg = 'Keep Practicing!'; }
+  else { emoji = '📚'; msg = 'Keep Learning!'; }
+
+  const deg = Math.round((score / total) * 240);
+
+  gs.innerHTML = `
+    <div class="results-screen">
+      <span class="result-emoji">${emoji}</span>
+      <div class="score-ring" style="background:conic-gradient(var(--accent1) 0deg, var(--accent2) ${deg}deg, var(--surface) ${deg}deg)">
+        <div class="score-num">${pct}%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-sub">You got <strong style="color:var(--accent3)">${score} out of ${total}</strong> questions right!</div>
+      <div class="flex-row" style="justify-content:center;gap:14px">
+        <button class="btn btn-primary" onclick="startQuiz(currentQuiz)">🔄 Play Again</button>
+        <button class="btn btn-secondary" onclick="renderPlaySelect()">← Quiz List</button>
+      </div>
+    </div>
+  `;
+}
+
+// ===== INIT =====
+// Add a sample quiz if first time
+if (quizzes.length === 0) {
+  quizzes.push({
+    id: 1,
+    title: "🌍 World Capitals",
+    desc: "Test your knowledge of world capitals!",
+    cat: "🌍 Geography",
+    created: new Date().toLocaleDateString(),
+    questions: [
+      { text: "What is the capital of Japan?", options: [{letter:'A',text:'Beijing'},{letter:'B',text:'Seoul'},{letter:'C',text:'Tokyo'},{letter:'D',text:'Bangkok'}], correct: 'C' },
+      { text: "What is the capital of Australia?", options: [{letter:'A',text:'Sydney'},{letter:'B',text:'Melbourne'},{letter:'C',text:'Brisbane'},{letter:'D',text:'Canberra'}], correct: 'D' },
+      { text: "What is the capital of Brazil?", options: [{letter:'A',text:'São Paulo'},{letter:'B',text:'Brasília'},{letter:'C',text:'Rio de Janeiro'},{letter:'D',text:'Salvador'}], correct: 'B' },
+    ]
+  });
+  localStorage.setItem('quizcraft_quizzes', JSON.stringify(quizzes));
+}
+</script>
+</body>
+</html>
